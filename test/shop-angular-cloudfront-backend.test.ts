@@ -1,17 +1,22 @@
-// import * as cdk from 'aws-cdk-lib/core';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as ShopAngularCloudfrontBackend from '../lib/shop-angular-cloudfront-backend-stack';
+import * as cdk from 'aws-cdk-lib';
+import { Template } from 'aws-cdk-lib/assertions';
+import { ProductServiceStack } from '../lib/product-service-stack';
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/shop-angular-cloudfront-backend-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new ShopAngularCloudfrontBackend.ShopAngularCloudfrontBackendStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+test('Creates products lambda and GET /products endpoint', () => {
+	const app = new cdk.App();
+	const stack = new ProductServiceStack(app, 'ProductServiceStackDev', {
+		stageName: 'dev',
+	});
+	const template = Template.fromStack(stack);
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+	template.hasResourceProperties('AWS::Lambda::Function', {
+		Handler: 'handlers/index.getProductsList',
+		Runtime: 'nodejs20.x',
+	});
+
+	template.hasResourceProperties('AWS::ApiGateway::Method', {
+		HttpMethod: 'GET',
+	});
+
+	template.hasOutput('ProductsApiUrl', {});
 });

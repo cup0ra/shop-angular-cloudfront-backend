@@ -8,14 +8,22 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "swagger:ui": "node scripts/serve-swagger-ui.mjs",
+    "cdk": "cdk",
+    "cdk:synth": "cdk synth",
+    "cdk:deploy": "cdk deploy --all",
+    "cdk:deploy:dev": "cdk deploy ProductServiceStackDev",
+    "cdk:deploy:prod": "cdk deploy ProductServiceStackProd",
+    "cdk:destroy": "cdk destroy --all",
+    "build-deploy": "npm run build && npm run cdk:deploy"
   },
   "devDependencies": {
     "@types/jest": "^30",
     "@types/node": "^24.10.1",
-    "jest": "^30",
-    "ts-jest": "^29",
     "aws-cdk": "2.1114.1",
+    "jest": "^30",
+    "swagger-ui-dist": "^5.32.1",
+    "ts-jest": "^29",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3"
   },
