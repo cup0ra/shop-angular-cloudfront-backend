@@ -10,7 +10,7 @@ test('Creates products lambda and GET /products endpoint', () => {
 	const template = Template.fromStack(stack);
 
 	template.hasResourceProperties('AWS::Lambda::Function', {
-		Handler: 'handlers/index.getProductsList',
+		Handler: 'index.getProductsList',
 		Runtime: 'nodejs20.x',
 	});
 

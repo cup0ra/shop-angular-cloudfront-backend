@@ -3,6 +3,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as path from 'node:path';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs';
+import { createLambda } from './lambda-factory';
 
 type ProductServiceStackProps = cdk.StackProps & {
   stageName: string;
@@ -28,27 +29,26 @@ export class ProductServiceStack extends cdk.Stack {
     const { stageName } = props;
     const allowedOrigins = getAllowedOrigins(stageName);
 
-    const getProductsList = new lambda.Function(this, 'GetProductsListFunction', {
-      runtime: lambda.Runtime.NODEJS_20_X,
+  const getProductsList = createLambda(this, 'GetProductsListFunction', {
+    entry: path.join(__dirname, '../src/products/index.ts'),
+      handler: 'getProductsList',
       memorySize: 1024,
-      timeout: cdk.Duration.seconds(5),
-      handler: 'handlers/index.getProductsList',
-      code: lambda.Code.fromAsset(path.join(__dirname, './')),
+      timeout: 5,
       environment: {
         ALLOWED_ORIGINS: allowedOrigins.join(','),
       },
     });
 
-    const getProductById = new lambda.Function(this, 'GetProductByIdFunction', {
-      runtime: lambda.Runtime.NODEJS_20_X,
+    const getProductById = createLambda(this, 'GetProductByIdFunction', {
+      entry: path.join(__dirname, '../src/products/index.ts'),
+      handler: 'getProductsById',
       memorySize: 1024,
-      timeout: cdk.Duration.seconds(5),
-      handler: 'handlers/index.getProductsById',
-      code: lambda.Code.fromAsset(path.join(__dirname, './')),
+      timeout: 5,
       environment: {
         ALLOWED_ORIGINS: allowedOrigins.join(','),
       },
     });
+
 
     const api = new apigateway.RestApi(this, 'ProductServiceApi', {
       restApiName: `Product Service API ${stageName}`,
