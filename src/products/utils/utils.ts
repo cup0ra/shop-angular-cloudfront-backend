@@ -1,3 +1,5 @@
+import { DynamoDBDocumentClient, ScanCommand, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { Product } from '../models';
 import { products } from '../db/products';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda/trigger/api-gateway-proxy';
@@ -56,4 +58,23 @@ export function getProducts(): Promise<Product[]> {
 export async function findProductById(id: string): Promise<Product | undefined> {
   const products = await getProducts();
   return Promise.resolve(products.find(product => product.id === id));
+}
+
+export async function scanAll(
+  client: DynamoDBDocumentClient,
+  tableName: string
+): Promise<Record<string, NativeAttributeValue>[]> {
+  const items: Record<string, NativeAttributeValue>[] = [];
+  let lastEvaluatedKey: Record<string, NativeAttributeValue> | undefined;
+
+  do {
+    const params: ScanCommandInput = { TableName: tableName, ExclusiveStartKey: lastEvaluatedKey };
+    const result = await client.send(new ScanCommand(params));
+    if (result.Items) {
+      items.push(...result.Items);
+    }
+    lastEvaluatedKey = result.LastEvaluatedKey;
+  } while (lastEvaluatedKey !== undefined);
+
+  return items;
 }
