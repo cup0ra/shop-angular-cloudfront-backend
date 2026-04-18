@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: Product Service API
+  version: 1.0.0
+  description: API documentation for Product Service endpoints used by the storefront PLP and PDP.
+servers:
+  - url: https://{apiId}.execute-api.{region}.amazonaws.com/dev
+    description: Dev environment
+    variables:
+      apiId:
+        default: your-dev-api-id
+      region:
+        default: us-east-1
+  - url: https://{apiId}.execute-api.{region}.amazonaws.com/prod
+    description: Prod environment
+    variables:
+      apiId:
+        default: your-prod-api-id
+      region:
+        default: us-east-1
+tags:
+  - name: Products
+    description: Product Service endpoints
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get products list
+      operationId: getProductsList
+      description: Returns the full array of mock products for the Product List Page.
+      responses:
+        '200':
+          description: Products list returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                default:
+                  value:
+                    - id: 7567ec4b-b10c-48c5-9345-fc73c48a80aa
+                      title: ProductOne
+                      description: Short Product Description1
+                      price: 2.4
+                      count: 4
+                    - id: 7567ec4b-b10c-48c5-9345-fc73c48a80ab
+                      title: ProductNew
+                      description: Short Product Description3
+                      price: 10
+                      count: 6
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product by id
+      operationId: getProductsById
+      description: Returns a single product by identifier for the Product Details Page.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Missing product id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Product id is required
+        '404':
+          description: Product not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Product not found
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - price
+        - count
+      properties:
+        id:
+          type: string
+          example: 7567ec4b-b10c-48c5-9345-fc73c48a80aa
+        title:
+          type: string
+          example: ProductOne
+        description:
+          type: string
+          example: Short Product Description1
+        price:
+          type: number
+          format: float
+          example: 2.4
+        count:
+          type: integer
+          example: 4
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Product not found

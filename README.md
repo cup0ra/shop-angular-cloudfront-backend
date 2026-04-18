@@ -1,14 +1,21 @@
-# Welcome to your CDK TypeScript project
+# Product Service
 
-This is a blank project for CDK development with TypeScript.
+AWS CDK project for the Product Service used by the storefront.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Available endpoints
+
+* `GET /products` returns the full mock products list for PLP.
+* `GET /products/{id}` returns a single product by id for PDP.
+
+## Swagger documentation
+For a local rendered Swagger UI, run `npm run swagger:ui` and open `http://localhost:8081`.
 
 ## Useful commands
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+* `npm run build` compiles TypeScript.
+* `npm run test` runs unit tests.
+* `npm run swagger:ui` starts local Swagger UI.
+* `npm run cdk:synth` synthesizes CloudFormation templates.
+* `npm run cdk:deploy:dev` deploys the dev stack.
+* `npm run cdk:deploy:prod` deploys the prod stack.
+* `npm run cdk:deploy` deploys all stacks.
