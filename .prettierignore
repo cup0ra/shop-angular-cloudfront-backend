@@ -1,0 +1,14 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+*.js
+*.d.ts
+cdk.out
+
+# Coverage
+coverage
+
+# Package files
+package-lock.json

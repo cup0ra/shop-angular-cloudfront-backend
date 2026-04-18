@@ -3,16 +3,17 @@ import { products } from '../db/products';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda/trigger/api-gateway-proxy';
 
 function getAllowedOrigins(): string[] {
-  return process.env.ALLOWED_ORIGINS?.split(',')
-    .map(origin => origin.trim())
-    .filter(Boolean) ?? [];
+  return (
+    process.env.ALLOWED_ORIGINS?.split(',')
+      .map(origin => origin.trim())
+      .filter(Boolean) ?? []
+  );
 }
 
 export function getResponseHeaders(origin?: string): Record<string, string> {
   const allowedOrigins = getAllowedOrigins();
-  const allowOrigin = origin && allowedOrigins.includes(origin)
-    ? origin
-    : allowedOrigins[0] ?? '*';
+  const allowOrigin =
+    origin && allowedOrigins.includes(origin) ? origin : (allowedOrigins[0] ?? '*');
 
   return {
     'Access-Control-Allow-Origin': allowOrigin,
@@ -28,7 +29,11 @@ export function getProductId(event?: APIGatewayProxyEvent): string | undefined {
   return event?.pathParameters?.id;
 }
 
-export function createResponse(statusCode: number, payload: unknown, origin?: string): APIGatewayProxyResult {
+export function createResponse(
+  statusCode: number,
+  payload: unknown,
+  origin?: string
+): APIGatewayProxyResult {
   return {
     statusCode,
     headers: getResponseHeaders(origin),
