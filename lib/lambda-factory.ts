@@ -1,10 +1,10 @@
-import * as path from 'node:path';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Duration } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export interface CreateLambdaProps {
+  description?: string;
   entry: string;
   handler?: string;
   memorySize?: number;
@@ -14,6 +14,7 @@ export interface CreateLambdaProps {
 
 export const createLambda = (scope: Construct, id: string, props: CreateLambdaProps) => {
   return new NodejsFunction(scope, id, {
+    description: props.description,
     runtime: lambda.Runtime.NODEJS_22_X,
     entry: props.entry,
     handler: props.handler ?? 'handler',

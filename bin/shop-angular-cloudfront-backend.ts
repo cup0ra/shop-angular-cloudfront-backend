@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib/core';
 import { ProductServiceStack } from '../lib/product-service-stack';
+import { ImportServiceStack } from '../lib/import-service-stack';
 
 const app = new cdk.App();
 const defaultStackProps = {
@@ -22,6 +23,16 @@ new ProductServiceStack(app, 'ProductServiceStackDev', {
 });
 
 new ProductServiceStack(app, 'ProductServiceStackProd', {
+  ...defaultStackProps,
+  stageName: 'prod',
+});
+
+new ImportServiceStack(app, 'ImportServiceStackDev', {
+  ...defaultStackProps,
+  stageName: 'dev',
+});
+
+new ImportServiceStack(app, 'ImportServiceStackProd', {
   ...defaultStackProps,
   stageName: 'prod',
 });

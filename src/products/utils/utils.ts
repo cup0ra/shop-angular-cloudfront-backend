@@ -3,6 +3,8 @@ import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { Product } from '../models';
 import { products } from '../db/products';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda/trigger/api-gateway-proxy';
+import * as cdk from 'aws-cdk-lib';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
 function getAllowedOrigins(): string[] {
   return (
@@ -77,4 +79,13 @@ export async function scanAll(
   } while (lastEvaluatedKey !== undefined);
 
   return items;
+}
+
+export const allowedOriginsByStage: Record<string, string[]> = {
+  dev: ['*'],
+  prod: ['https://dzpenjz7rcmzz.cloudfront.net'],
+};
+
+export function buildStageUrl(api: apigateway.RestApi, stack: cdk.Stack, stageName: string) {
+  return `https://${api.restApiId}.execute-api.${stack.region}.${stack.urlSuffix}/${stageName}/`;
 }
