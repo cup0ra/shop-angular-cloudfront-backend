@@ -5,23 +5,11 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 import { createLambda } from './lambda-factory';
+import { allowedOriginsByStage, buildStageUrl } from '../src/products';
 
 type ProductServiceStackProps = cdk.StackProps & {
   stageName: string;
 };
-
-const allowedOriginsByStage: Record<string, string[]> = {
-  dev: ['*'],
-  prod: ['https://dzpenjz7rcmzz.cloudfront.net'],
-};
-
-function buildStageUrl(api: apigateway.RestApi, stack: cdk.Stack, stageName: string) {
-  return `https://${api.restApiId}.execute-api.${stack.region}.${stack.urlSuffix}/${stageName}/`;
-}
-
-function getAllowedOrigins(stageName: string) {
-  return allowedOriginsByStage[stageName] ?? [];
-}
 
 export class ProductServiceStack extends cdk.Stack {
   private productTableName = 'Products';
@@ -31,7 +19,7 @@ export class ProductServiceStack extends cdk.Stack {
     super(scope, id, props);
 
     const { stageName } = props;
-    const allowedOrigins = getAllowedOrigins(stageName);
+    const allowedOrigins = allowedOriginsByStage[stageName] ?? [];
 
     const environment = this.createEnvironment(allowedOrigins, stageName);
     const { productsTable, stockTable } = this.createTables(stageName);
@@ -86,20 +74,23 @@ export class ProductServiceStack extends cdk.Stack {
 
     const getProductsList = createLambda(this, 'GetProductsListFunction', {
       entry,
-      handler: 'getProductsList',
       environment,
+      handler: 'getProductsList',
+      description: 'Retrieves the list of products from the database',
     });
 
     const getProductById = createLambda(this, 'GetProductByIdFunction', {
       entry,
-      handler: 'getProductsById',
       environment,
+      handler: 'getProductsById',
+      description: 'Retrieves a product by its ID from the database',
     });
 
     const createProduct = createLambda(this, 'CreateProduct', {
       entry,
-      handler: 'createProduct',
       environment,
+      handler: 'createProduct',
+      description: 'Creates a new product in the database',
     });
 
     return { getProductsList, getProductById, createProduct };
