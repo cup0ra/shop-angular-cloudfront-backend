@@ -1,6 +1,5 @@
-import { APIGatewayProxyEvent } from "aws-lambda";
-import { getProductsById, getProductsList, products } from "../src/products";
-
+import { APIGatewayProxyEvent } from 'aws-lambda';
+import { getProductsById, getProductsList, products } from '../src/products';
 
 describe('Product Service handlers', () => {
   beforeEach(() => {

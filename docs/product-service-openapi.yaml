@@ -4,20 +4,10 @@ info:
   version: 1.0.0
   description: API documentation for Product Service endpoints used by the storefront PLP and PDP.
 servers:
-  - url: https://{apiId}.execute-api.{region}.amazonaws.com/dev
+  - url: https://nes5rvdgle.execute-api.us-east-1.amazonaws.com/dev
     description: Dev environment
-    variables:
-      apiId:
-        default: your-dev-api-id
-      region:
-        default: us-east-1
-  - url: https://{apiId}.execute-api.{region}.amazonaws.com/prod
+  - url: https://awoacy0dc5.execute-api.us-east-1.amazonaws.com/prod
     description: Prod environment
-    variables:
-      apiId:
-        default: your-prod-api-id
-      region:
-        default: us-east-1
 tags:
   - name: Products
     description: Product Service endpoints
@@ -28,7 +18,7 @@ paths:
         - Products
       summary: Get products list
       operationId: getProductsList
-      description: Returns the full array of mock products for the Product List Page.
+      description: Returns the full array of products with stock counts for the Product List Page.
       responses:
         '200':
           description: Products list returned successfully.
@@ -44,13 +34,79 @@ paths:
                     - id: 7567ec4b-b10c-48c5-9345-fc73c48a80aa
                       title: ProductOne
                       description: Short Product Description1
-                      price: 2.4
+                      price: 2
                       count: 4
                     - id: 7567ec4b-b10c-48c5-9345-fc73c48a80ab
                       title: ProductNew
                       description: Short Product Description3
                       price: 10
                       count: 6
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      operationId: createProduct
+      description: Creates a new product and its stock record in a single DynamoDB transaction.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+            example:
+              title: New Product
+              description: A great product
+              price: 15
+              count: 10
+      responses:
+        '201':
+          description: Product created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              example:
+                id: 7567ec4b-b10c-48c5-9345-fc73c48a80ac
+                title: New Product
+                description: A great product
+                price: 15
+                count: 10
+        '400':
+          description: Invalid or missing request body.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+              examples:
+                missingBody:
+                  summary: No body provided
+                  value:
+                    message: Product data is required
+                invalidJson:
+                  summary: Malformed JSON
+                  value:
+                    message: Invalid JSON body
+                validationError:
+                  summary: Schema validation failed
+                  value:
+                    message: Invalid product data
+                    errors:
+                      - code: too_small
+                        minimum: 1
+                        type: string
+                        inclusive: true
+                        exact: false
+                        message: String must contain at least 1 character(s)
+                        path:
+                          - title
         '500':
           description: Internal server error.
           content:
@@ -121,11 +177,34 @@ components:
           type: string
           example: Short Product Description1
         price:
-          type: number
-          format: float
-          example: 2.4
+          type: integer
+          example: 2
         count:
           type: integer
+          example: 4
+    CreateProductRequest:
+      type: object
+      required:
+        - title
+        - description
+        - price
+        - count
+      properties:
+        title:
+          type: string
+          minLength: 1
+          example: ProductOne
+        description:
+          type: string
+          minLength: 1
+          example: Short Product Description1
+        price:
+          type: integer
+          minimum: 1
+          example: 2
+        count:
+          type: integer
+          minimum: 0
           example: 4
     ErrorResponse:
       type: object
@@ -135,3 +214,25 @@ components:
         message:
           type: string
           example: Product not found
+    ValidationErrorResponse:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+          example: Invalid product data
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+              path:
+                type: array
+                items:
+                  type: string

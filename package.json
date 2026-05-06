@@ -8,7 +8,10 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
+    "format": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md,yml,yaml}\"",
     "swagger:ui": "node scripts/serve-swagger-ui.mjs",
+    "seed": "tsc scripts/seed.ts && node scripts/seed.js",
     "cdk": "cdk",
     "cdk:synth": "cdk synth",
     "cdk:deploy": "cdk deploy --all",
@@ -24,13 +27,20 @@
     "aws-cdk": "2.1114.1",
     "esbuild": "^0.28.0",
     "jest": "^30",
+    "prettier": "^3.8.1",
     "swagger-ui-dist": "^5.32.1",
     "ts-jest": "^29",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1026.0",
+    "@aws-sdk/lib-dynamodb": "^3.1029.0",
+    "@aws-sdk/util-dynamodb": "^3",
+    "@types/uuid": "^10.0.0",
     "aws-cdk-lib": "^2.244.0",
-    "constructs": "^10.5.0"
+    "constructs": "^10.5.0",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
   }
 }

@@ -12,24 +12,21 @@ export interface CreateLambdaProps {
   environment?: Record<string, string>;
 }
 
-export const createLambda = (
-  scope: Construct,
-  id: string,
-  props: CreateLambdaProps,
-) => {
+export const createLambda = (scope: Construct, id: string, props: CreateLambdaProps) => {
   return new NodejsFunction(scope, id, {
-    runtime: lambda.Runtime.NODEJS_20_X,
+    runtime: lambda.Runtime.NODEJS_22_X,
     entry: props.entry,
     handler: props.handler ?? 'handler',
-    memorySize: props.memorySize ?? 512,
+    memorySize: props.memorySize ?? 1024,
     timeout: Duration.seconds(props.timeout ?? 5),
     environment: props.environment,
 
     bundling: {
       minify: true,
       sourceMap: true,
-      target: 'node20',
+      target: 'node22',
       sourcesContent: false,
+      externalModules: [], // Bundle @aws-sdk instead of relying on the Lambda runtime version
     },
   });
 };
