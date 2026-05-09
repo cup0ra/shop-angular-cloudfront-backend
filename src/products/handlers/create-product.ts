@@ -1,17 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { createResponse, getErrorMessage, getRequestOrigin } from '../utils';
+import { createProductSchema, createResponse, getErrorMessage, getRequestOrigin } from '../utils';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { z } from 'zod';
 import { dynamoDB, productTableName, stockTableName } from '../db';
-
-const createProductSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
-  price: z.number().int().positive(),
-  count: z.number().int().nonnegative(),
-});
 
 type CreateProductBody = z.infer<typeof createProductSchema>;
 

@@ -6,18 +6,25 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import { buildStageUrl } from '../src/products';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 const { HttpMethods, EventType } = aws_s3;
 
 interface ImportServiceStackProps extends StackProps {
   stageName: string;
+  batchSize: string;
+  catalogItemsQueue: sqs.IQueue;
 }
 
 export class ImportServiceStack extends Stack {
+  public readonly batchSize: string;
+  public readonly queueUrl: string;
   constructor(scope: Construct, id: string, props: ImportServiceStackProps) {
     super(scope, id, props);
 
-    const { stageName } = props;
+    const { stageName, batchSize, catalogItemsQueue } = props;
+    this.batchSize = batchSize;
+    this.queueUrl = catalogItemsQueue.queueUrl;
     const bucketName = `cup0ra-product-file-bucket-${stageName}`;
     const bucketUploadFolder = 'uploaded';
     const bucketParsedFolder = 'parsed';
@@ -36,6 +43,7 @@ export class ImportServiceStack extends Stack {
     productFileBucket.grantRead(importFileParser, `${bucketUploadFolder}/*`);
     productFileBucket.grantDelete(importFileParser, `${bucketUploadFolder}/*`);
     productFileBucket.grantPut(importFileParser, `${bucketParsedFolder}/*`);
+    props.catalogItemsQueue.grantSendMessages(importFileParser);
 
     productFileBucket.addEventNotification(
       EventType.OBJECT_CREATED,
@@ -77,6 +85,8 @@ export class ImportServiceStack extends Stack {
       BUCKET_NAME: bucketName,
       BUCKET_UPLOAD_FOLDER: bucketUploadFolder,
       BUCKET_PARSED_FOLDER: bucketParsedFolder,
+      QUEUE_URL: this.queueUrl,
+      BATCH_SIZE: this.batchSize,
     };
     const importProductFile = createLambda(this, 'ImportProductFileFunction', {
       entry,

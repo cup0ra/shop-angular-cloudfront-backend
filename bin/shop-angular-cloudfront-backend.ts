@@ -17,22 +17,26 @@ const defaultStackProps = {
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 };
 
-new ProductServiceStack(app, 'ProductServiceStackDev', {
+const productServiceStackDev = new ProductServiceStack(app, 'ProductServiceStackDev', {
   ...defaultStackProps,
   stageName: 'dev',
-});
-
-new ProductServiceStack(app, 'ProductServiceStackProd', {
-  ...defaultStackProps,
-  stageName: 'prod',
 });
 
 new ImportServiceStack(app, 'ImportServiceStackDev', {
   ...defaultStackProps,
   stageName: 'dev',
+  catalogItemsQueue: productServiceStackDev.catalogItemsQueue,
+  batchSize: productServiceStackDev.batchSize,
+});
+
+const productServiceStackProd = new ProductServiceStack(app, 'ProductServiceStackProd', {
+  ...defaultStackProps,
+  stageName: 'prod',
 });
 
 new ImportServiceStack(app, 'ImportServiceStackProd', {
   ...defaultStackProps,
   stageName: 'prod',
+  catalogItemsQueue: productServiceStackProd.catalogItemsQueue,
+  batchSize: productServiceStackProd.batchSize,
 });

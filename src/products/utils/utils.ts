@@ -5,6 +5,7 @@ import { products } from '../db/products';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda/trigger/api-gateway-proxy';
 import * as cdk from 'aws-cdk-lib';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import { z } from 'zod';
 
 function getAllowedOrigins(): string[] {
   return (
@@ -89,3 +90,10 @@ export const allowedOriginsByStage: Record<string, string[]> = {
 export function buildStageUrl(api: apigateway.RestApi, stack: cdk.Stack, stageName: string) {
   return `https://${api.restApiId}.execute-api.${stack.region}.${stack.urlSuffix}/${stageName}/`;
 }
+
+export const createProductSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  price: z.number().int().positive(),
+  count: z.number().int().nonnegative(),
+});

@@ -1,6 +1,12 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { getProductsById, getProductsList, importProductFile, products } from '../src/products';
+import {
+  getProductsById,
+  getProductsList,
+  importFileParser,
+  importProductFile,
+  products,
+} from '../src/products';
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
   getSignedUrl: jest.fn(),
@@ -110,5 +116,21 @@ describe('Product Service handlers', () => {
 
     expect(response.statusCode).toBe(500);
     expect(JSON.parse(response.body)).toEqual({ message: 'Could not generate signed URL' });
+  });
+
+  test('importFileParser skips malformed events without Records', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    await expect(importFileParser({} as never)).resolves.toBeUndefined();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'importFileParser received an event without S3 records',
+      {
+        eventType: 'object',
+        topLevelKeys: [],
+      }
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 });
