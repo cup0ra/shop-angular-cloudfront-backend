@@ -1,7 +1,9 @@
 #!/usr/bin/env node
+import 'dotenv/config';
 import * as cdk from 'aws-cdk-lib/core';
 import { ProductServiceStack } from '../lib/product-service-stack';
 import { ImportServiceStack } from '../lib/import-service-stack';
+import { AuthorizationServiceStack } from '../lib/authorization-service-stack';
 
 const app = new cdk.App();
 const defaultStackProps = {
@@ -22,21 +24,41 @@ const productServiceStackDev = new ProductServiceStack(app, 'ProductServiceStack
   stageName: 'dev',
 });
 
-new ImportServiceStack(app, 'ImportServiceStackDev', {
+const authorizationServiceStackDev = new AuthorizationServiceStack(
+  app,
+  'AuthorizationServiceStackDev',
+  {
+    ...defaultStackProps,
+    stageName: 'dev',
+  }
+);
+
+const importServiceStackDev = new ImportServiceStack(app, 'ImportServiceStackDev', {
   ...defaultStackProps,
   stageName: 'dev',
   catalogItemsQueue: productServiceStackDev.catalogItemsQueue,
   batchSize: productServiceStackDev.batchSize,
 });
+importServiceStackDev.addDependency(authorizationServiceStackDev);
 
 const productServiceStackProd = new ProductServiceStack(app, 'ProductServiceStackProd', {
   ...defaultStackProps,
   stageName: 'prod',
 });
 
-new ImportServiceStack(app, 'ImportServiceStackProd', {
+const authorizationServiceStackProd = new AuthorizationServiceStack(
+  app,
+  'AuthorizationServiceStackProd',
+  {
+    ...defaultStackProps,
+    stageName: 'prod',
+  }
+);
+
+const importServiceStackProd = new ImportServiceStack(app, 'ImportServiceStackProd', {
   ...defaultStackProps,
   stageName: 'prod',
   catalogItemsQueue: productServiceStackProd.catalogItemsQueue,
   batchSize: productServiceStackProd.batchSize,
 });
+importServiceStackProd.addDependency(authorizationServiceStackProd);
