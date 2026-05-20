@@ -7,6 +7,7 @@ import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import { buildStageUrl } from '../src/products';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as cdk from 'aws-cdk-lib';
 
 const { HttpMethods, EventType } = aws_s3;
 
@@ -70,6 +71,7 @@ export class ImportServiceStack extends Stack {
             'X-Api-Key',
             'X-Amz-Security-Token',
           ],
+          exposedHeaders: ['ETag'],
         },
       ],
     });
@@ -121,15 +123,57 @@ export class ImportServiceStack extends Stack {
       },
     });
 
+    const corsResponseHeaders = {
+      'Access-Control-Allow-Origin': "'*'",
+      'Access-Control-Allow-Headers': "'Content-Type,Authorization'",
+      'Access-Control-Allow-Methods': "'GET,OPTIONS'",
+    };
+
+    api.addGatewayResponse('Default4xxResponse', {
+      type: apigateway.ResponseType.DEFAULT_4XX,
+      responseHeaders: corsResponseHeaders,
+    });
+
+    api.addGatewayResponse('UnauthorizedResponse', {
+      type: apigateway.ResponseType.UNAUTHORIZED,
+      responseHeaders: corsResponseHeaders,
+    });
+
+    api.addGatewayResponse('AccessDeniedResponse', {
+      type: apigateway.ResponseType.ACCESS_DENIED,
+      responseHeaders: corsResponseHeaders,
+    });
+    const basicAuthorizerArn = cdk.Fn.importValue(`BasicAuthorizerLambdaArn-${stageName}`);
+
+    const basicAuthorizerLambda = lambda.Function.fromFunctionAttributes(
+      this,
+      'ImportedBasicAuthorizerLambda',
+      {
+        functionArn: basicAuthorizerArn,
+        sameEnvironment: true,
+      }
+    );
+
+    const basicAuthorizer = new apigateway.TokenAuthorizer(this, 'BasicAuthorizer', {
+      handler: basicAuthorizerLambda,
+      identitySource: apigateway.IdentitySource.header('Authorization'),
+      resultsCacheTtl: cdk.Duration.seconds(0),
+    });
+
     const stageUrl = buildStageUrl(api, this, api.deploymentStage.stageName);
     const importResource = api.root.addResource('import');
 
-    importResource.addMethod('GET', new apigateway.LambdaIntegration(importProductFile));
+    importResource.addMethod('GET', new apigateway.LambdaIntegration(importProductFile), {
+      authorizer: basicAuthorizer,
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+    });
 
     importResource.addCorsPreflight({
       allowOrigins: allowedOrigins,
       allowMethods: [HttpMethods.GET, HttpMethods.POST, HttpMethods.PUT, HttpMethods.DELETE],
+      allowHeaders: ['Content-Type', 'Authorization'],
     });
+
     new CfnOutput(this, 'ImportApiUrl', {
       value: `${stageUrl}import`,
     });

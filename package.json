@@ -15,8 +15,8 @@
     "cdk": "cdk",
     "cdk:synth": "cdk synth",
     "cdk:deploy": "cdk deploy --all",
-    "cdk:deploy:dev": "cdk deploy ProductServiceStackDev ImportServiceStackDev",
-    "cdk:deploy:prod": "cdk deploy ProductServiceStackProd ImportServiceStackProd",
+    "cdk:deploy:dev": "cdk deploy ProductServiceStackDev AuthorizationServiceStackDev ImportServiceStackDev",
+    "cdk:deploy:prod": "cdk deploy ProductServiceStackProd AuthorizationServiceStackProd ImportServiceStackProd",
     "cdk:destroy": "cdk destroy --all",
     "build-deploy": "npm run build && npm run cdk:deploy"
   },
@@ -45,6 +45,7 @@
     "aws-cdk-lib": "^2.244.0",
     "constructs": "^10.5.0",
     "csv-parser": "^3.2.0",
+    "dotenv": "^17.4.2",
     "uuid": "^14.0.0",
     "zod": "^3.23.8"
   }

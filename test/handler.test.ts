@@ -42,12 +42,10 @@ jest.mock('@aws-sdk/client-sns', () => {
   };
 });
 
-const mockDynamoSend = (
-  jest.requireMock('../src/products/db') as { dynamoDB: { send: jest.Mock } }
-).dynamoDB.send;
-const mockSnsSend = (
-  jest.requireMock('@aws-sdk/client-sns') as { __mockSnsSend: jest.Mock }
-).__mockSnsSend;
+const mockDynamoSend = (jest.requireMock('../src/products/db') as { dynamoDB: { send: jest.Mock } })
+  .dynamoDB.send;
+const mockSnsSend = (jest.requireMock('@aws-sdk/client-sns') as { __mockSnsSend: jest.Mock })
+  .__mockSnsSend;
 
 describe('Product Service handlers', () => {
   beforeEach(() => {
@@ -197,10 +195,7 @@ describe('Product Service handlers', () => {
 
     await expect(importFileParser({} as never)).rejects.toBeInstanceOf(TypeError);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'importFileParser error:',
-      expect.any(TypeError)
-    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith('importFileParser error:', expect.any(TypeError));
 
     consoleErrorSpy.mockRestore();
   });
